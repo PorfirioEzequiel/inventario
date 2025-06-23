@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import Input from "./components/ui/input";
 import Textarea from "./components/ui/textarea";
 import Button from "./components/ui/button";
-import generarPDF from './generarPDF';
+// import generarPDF from './generarPDF';
 
 const supabaseUrl = 'https://plaglyjhbwmfmkssleie.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWdseWpoYndtZm1rc3NsZWllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTg5NTIxOSwiZXhwIjoyMDQ3NDcxMjE5fQ._0eOYhlPsxThAx3lxkhxKfZ0Oz-_2uOtsrwpj-J1W7I';
