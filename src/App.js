@@ -4,9 +4,15 @@ import { v4 as uuidv4 } from "uuid";
 import Input from "./components/ui/input";
 import Textarea from "./components/ui/textarea";
 import Button from "./components/ui/button";
+import generarPDF from './generarPDF';
+
 const supabaseUrl = 'https://plaglyjhbwmfmkssleie.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWdseWpoYndtZm1rc3NsZWllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTg5NTIxOSwiZXhwIjoyMDQ3NDcxMjE5fQ._0eOYhlPsxThAx3lxkhxKfZ0Oz-_2uOtsrwpj-J1W7I';
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+
+
+
 // const supabase = createClient("https://TU_PROYECTO.supabase.co", "TU_API_KEY");
 
 const App = () => {
@@ -21,6 +27,8 @@ const App = () => {
     cuenta_auditorio: "No",
     condiciones_auditorio: "",
     articulos: [],
+    fotos_delegacion: [],
+    fotos_auditorio: [],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -161,10 +169,13 @@ return true;
       const { error } = await supabase.from("inventario_delegaciones").insert({
         ...form,
         articulos_json: form.articulos,
+        fotos_delegacion: form.fotos_delegacion,
+        fotos_auditorio: form.fotos_auditorio,
       });
       
       if (error) throw error;
-      
+      // await generarPDF(form); // Llama esto después de guardar exitosamente
+
       alert("Inventario enviado correctamente");
       setForm({
         delegacion: "",
@@ -230,14 +241,17 @@ const delegacionesCatalogo = [
             </select>
           </div>
           
-          <Textarea 
+          {/* <Textarea 
             name="observaciones" 
             placeholder="Observaciones estructurales" 
             value={form.observaciones}
             onChange={handleInput} 
             rows={3}
             label="Observaciones"
-          />
+          /> */}
+          
+
+
           
           <Textarea 
             name="necesidades" 
@@ -249,12 +263,42 @@ const delegacionesCatalogo = [
           />
         </div>
 
+        <div className="mt-6">
+        <label className="block font-medium mb-2">Fotos de la delegación (6 imágenes)</label>
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="mb-2">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const filename = `delegacion_fotos/${form.delegacion}/${uuidv4()}-${file.name}`;
+                const { error } = await supabase.storage.from("evidenciasinventario").upload(filename, file);
+                if (!error) {
+                  const { data } = supabase.storage.from("evidenciasinventario").getPublicUrl(filename);
+                  setForm(prev => {
+                    const updated = [...(prev.fotos_delegacion || [])];
+                    updated[i] = data.publicUrl;
+                    return { ...prev, fotos_delegacion: updated };
+                  });
+                }
+              }}
+            />
+            {form.fotos_delegacion?.[i] && (
+              <p className="text-green-600 text-sm mt-1">✓ Subida: <a className="underline text-blue-600" href={form.fotos_delegacion[i]} target="_blank">Ver</a></p>
+            )}
+          </div>
+        ))}
+      </div>
+
+
         
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Artículos del Inventario</h2>
+          <h2 className="text-xl font-semibold">Inventario Patrimonial</h2>
           <Button onClick={addArticulo} variant="secondary">
             + Agregar Artículo
           </Button>
@@ -382,7 +426,7 @@ const delegacionesCatalogo = [
       </select>
     </div>
 
-    <div className="mt-4">
+    {/* <div className="mt-4">
       <label className="block mb-1 text-sm font-medium">Estado de la pintura</label>
       <select
         name="estado_pintura"
@@ -394,9 +438,9 @@ const delegacionesCatalogo = [
         <option value="Regular">Regular</option>
         <option value="Malo">Malo</option>
       </select>
-    </div>
+    </div> */}
 
-    <div className="mt-4">
+    {/* <div className="mt-4">
       <label className="block mb-1 text-sm font-medium">Evidencia fotográfica del auditorio</label>
       <input
         type="file"
@@ -430,8 +474,40 @@ const delegacionesCatalogo = [
           </a>
         </div>
       )}
-    </div>
+    </div> */}
 
+        {form.cuenta_auditorio === "Sí" && (
+      <div className="mt-6">
+        <label className="block font-medium mb-2">Fotos del auditorio (6 imágenes)</label>
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="mb-2">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const filename = `auditorio_fotos/${form.delegacion}/${uuidv4()}-${file.name}`;
+                const { error } = await supabase.storage.from("evidenciasinventario").upload(filename, file);
+                if (!error) {
+                  const { data } = supabase.storage.from("evidenciasinventario").getPublicUrl(filename);
+                  setForm(prev => {
+                    const updated = [...(prev.fotos_auditorio || [])];
+                    updated[i] = data.publicUrl;
+                    return { ...prev, fotos_auditorio: updated };
+                  });
+                }
+              }}
+            />
+            {form.fotos_auditorio?.[i] && (
+              <p className="text-green-600 text-sm mt-1">✓ Subida: <a className="underline text-blue-600" href={form.fotos_auditorio[i]} target="_blank">Ver</a></p>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+
+    
     <div className="mt-4">
       <Textarea
         name="condiciones_auditorio"
