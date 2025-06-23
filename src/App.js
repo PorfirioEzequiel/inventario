@@ -286,7 +286,7 @@ const delegacionesCatalogo = [
               }}
             />
             {form.fotos_delegacion?.[i] && (
-              <p className="text-green-600 text-sm mt-1">✓ Subida: <a className="underline text-blue-600" href={form.fotos_delegacion[i]} target="_blank">Ver</a></p>
+              <p className="text-green-600 text-sm mt-1">✓ Subida: <a className="underline text-blue-600" href={form.fotos_delegacion[i]} target="_blank" rel="noreferrer">Ver</a></p>
             )}
           </div>
         ))}
@@ -500,7 +500,7 @@ const delegacionesCatalogo = [
               }}
             />
             {form.fotos_auditorio?.[i] && (
-              <p className="text-green-600 text-sm mt-1">✓ Subida: <a className="underline text-blue-600" href={form.fotos_auditorio[i]} target="_blank">Ver</a></p>
+              <p className="text-green-600 text-sm mt-1">✓ Subida: <a className="underline text-blue-600" href={form.fotos_auditorio[i]} target="_blank" rel="noreferrer">Ver</a></p>
             )}
           </div>
         ))}
