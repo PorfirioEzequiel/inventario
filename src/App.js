@@ -33,7 +33,6 @@ const App = () => {
     condiciones_copaci: "",
     estado_copaci: "",
     fotos_copaci: [],
-    articulos: [],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
