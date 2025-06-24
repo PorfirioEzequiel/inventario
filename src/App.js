@@ -29,6 +29,11 @@ const App = () => {
     articulos: [],
     fotos_delegacion: [],
     fotos_auditorio: [],
+    instalaciones_copaci: "No",
+    condiciones_copaci: "",
+    estado_copaci: "",
+    fotos_copaci: [],
+    articulos: [],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -160,6 +165,21 @@ const App = () => {
 
 return true;
   };
+
+  const handleFotoCopaciChange = async (index, file) => {
+    if (!file) return;
+    const filename = `copaci/${form.delegacion}/${uuidv4()}-${file.name}`;
+    const { error } = await supabase.storage.from("evidenciasinventario").upload(filename, file);
+    if (!error) {
+      const { data } = supabase.storage.from("evidenciasinventario").getPublicUrl(filename);
+      setForm((prev) => {
+        const nuevasFotos = [...(prev.fotos_copaci || [])];
+        nuevasFotos[index] = { url: data.publicUrl, nombre: file.name };
+        return { ...prev, fotos_copaci: nuevasFotos };
+      });
+    }
+  };
+
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
@@ -396,6 +416,70 @@ const delegacionesCatalogo = [
 
         
       </div>
+      
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4">Instalaciones del COPACI</h2>
+        <label className="block mb-2 font-medium">¿Cuenta con instalaciones independientes?</label>
+        <select
+          name="instalaciones_copaci"
+          value={form.instalaciones_copaci}
+          onChange={(e) => handleInput(e)}
+          className="border rounded px-3 py-2 w-full md:w-1/2"
+        >
+          <option value="No">No</option>
+          <option value="Sí">Sí</option>
+        </select>
+
+        {form.instalaciones_copaci === "Sí" && (
+          <>
+            <div className="mt-4">
+              <label className="block mb-1 text-sm font-medium">Condiciones en que se encuentra</label>
+              <Textarea
+                name="condiciones_copaci"
+                placeholder="Describe las condiciones de las instalaciones del COPACI"
+                value={form.condiciones_copaci}
+                onChange={handleInput}
+                rows={2}
+              />
+            </div>
+
+            <div className="mt-4">
+              <label className="block mb-1 text-sm font-medium">Estado de las instalaciones</label>
+              <select
+                name="estado_copaci"
+                value={form.estado_copaci}
+                onChange={handleInput}
+                className="border rounded px-3 py-2 w-full"
+              >
+                <option value="">Selecciona una opción</option>
+                <option value="Bueno">Bueno</option>
+                <option value="Regular">Regular</option>
+                <option value="Malo">Malo</option>
+              </select>
+            </div>
+
+            <div className="mt-4">
+              <label className="block mb-1 text-sm font-medium">Evidencia fotográfica de las instalaciones del COPACI (6 fotos)</label>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="mb-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="border rounded px-3 py-2 w-full"
+                    onChange={(e) => handleFotoCopaciChange(i, e.target.files[0])}
+                  />
+                  {form.fotos_copaci[i]?.url && (
+                    <div className="text-green-600 text-sm mt-1">
+                      ✓ {form.fotos_copaci[i].nombre} — <a className="text-blue-600 underline" href={form.fotos_copaci[i].url} target="_blank">Ver</a>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>;
+
 
       <div className="mb-6">
           <label className="block mb-2 font-medium">¿Cuenta con auditorio? *</label>
