@@ -33,6 +33,7 @@ const App = () => {
     condiciones_copaci: "",
     estado_copaci: "",
     fotos_copaci: [],
+    articulosCopaci: [],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -57,11 +58,35 @@ const App = () => {
     }));
   };
 
+  const addArticuloCopaci = () => {
+    setForm(prev => ({
+      ...prev,
+      articulosCopaci: [
+        ...prev.articulosCopaci,
+        { 
+          articulo: "", 
+          cantidad: 0, 
+          estado: "Bueno", 
+          observaciones: "", 
+          fotos: [] 
+        },
+      ],
+    }));
+  };
+
   const removeArticulo = (index) => {
     setForm(prev => {
       const articulos = [...prev.articulos];
       articulos.splice(index, 1);
       return { ...prev, articulos };
+    });
+  };
+
+  const removeArticuloCopaci = (index) => {
+    setForm(prev => {
+      const articulosCopaci = [...prev.articulosCopaci];
+      articulosCopaci.splice(index, 1);
+      return { ...prev, articulosCopaci };
     });
   };
 
@@ -75,6 +100,19 @@ const App = () => {
       }
       
       return { ...prev, articulos: updated };
+    });
+  };
+
+  const handleArticuloChangeCopaci = (index, field, value) => {
+    setForm(prev => {
+      const updated = [...prev.articulosCopaci];
+      updated[index][field] = field === "cantidad" ? Number(value) : value;
+      
+      if (field === "cantidad" && updated[index].fotos?.length > value) {
+        updated[index].fotos = updated[index].fotos.slice(0, value);
+      }
+      
+      return { ...prev, articulosCopaci: updated };
     });
   };
 
@@ -107,6 +145,35 @@ const App = () => {
     }
   };
 
+  const handleFotoChangeCopaci = async (index, evidenciaIndex, file) => {
+    if (!file) return;
+    
+    setIsSubmitting(true);
+    try {
+      const filename = `copaci/${form.delegacion}/${uuidv4()}-${file.name}`;
+      const { error } = await supabase.storage.from("evidenciasinventario").upload(filename, file);
+      
+      if (!error) {
+        const { data: urlData } = supabase.storage.from("evidenciasinventario").getPublicUrl(filename);
+        setForm(prev => {
+          const updated = [...prev.articulosCopaci];
+          if (!updated[index].fotos) updated[index].fotos = [];
+          updated[index].fotos[evidenciaIndex] = {
+            url: urlData.publicUrl,
+            estado: "",
+            nombre: file.name
+          };
+          return { ...prev, articulosCopaci: updated };
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("Error al subir la imagen");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleEstadoFotoChange = (index, evidenciaIndex, estado) => {
     setForm(prev => {
       const updated = [...prev.articulos];
@@ -117,30 +184,21 @@ const App = () => {
     });
   };
 
+
+  const handleEstadoFotoChangeCopaci = (index, evidenciaIndex, estado) => {
+    setForm(prev => {
+      const updated = [...prev.articulosCopaci];
+      if (updated[index].fotos && updated[index].fotos[evidenciaIndex]) {
+        updated[index].fotos[evidenciaIndex].estado = estado;
+      }
+      return { ...prev, articulosCopaci: updated };
+    });
+  }; 
   const validateForm = () => {
     if (!form.delegacion.trim()) {
       alert("Por favor ingrese la delegación");
       return false;
     }
-    // if (!form.responsable.trim()) {
-    //   alert("Por favor ingrese el responsable");
-    //   return false;
-    // }
-    
-    // for (let i = 0; i < form.articulos.length; i++) {
-    //   const art = form.articulos[i];
-    //   if (!art.articulo.trim()) {
-    //     alert(`Por favor ingrese el nombre del artículo #${i + 1}`);
-    //     return false;
-    //   }
-    //   if (art.cantidad <= 0) {
-    //     alert(`La cantidad del artículo "${art.articulo}" debe ser mayor a 0`);
-    //     return false;
-    //   }
-    // }
-    
-    // return true;
-
 
     for (let i = 0; i < form.articulos.length; i++) {
   const art = form.articulos[i];
@@ -259,19 +317,7 @@ const delegacionesCatalogo = [
               <option value="Malo">Malo</option>
             </select>
           </div>
-          
-          {/* <Textarea 
-            name="observaciones" 
-            placeholder="Observaciones estructurales" 
-            value={form.observaciones}
-            onChange={handleInput} 
-            rows={3}
-            label="Observaciones"
-          /> */}
-          
 
-
-          
           <Textarea 
             name="necesidades" 
             placeholder="Necesidades de mantenimiento" 
@@ -313,11 +359,11 @@ const delegacionesCatalogo = [
 
 
         
-      </div>
+      
 
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Inventario Patrimonial</h2>
+          <h2 className="text-xl font-semibold">Inventario Patrimonial Delegación</h2>
           <Button onClick={addArticulo} variant="secondary">
             + Agregar Artículo
           </Button>
@@ -415,7 +461,7 @@ const delegacionesCatalogo = [
 
         
       </div>
-      
+      </div>
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold mb-4">Instalaciones del COPACI</h2>
         <label className="block mb-2 font-medium">¿Cuenta con instalaciones independientes?</label>
@@ -475,6 +521,107 @@ const delegacionesCatalogo = [
                 </div>
               ))}
             </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Inventario Patrimonial COPACI</h2>
+          <Button onClick={addArticuloCopaci} variant="secondary">
+            + Agregar Artículo
+          </Button>
+        </div>
+        
+        {form.articulosCopaci.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No hay artículos agregados aún
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {form.articulosCopaci.map((art, index) => (
+              <div key={index} className="border rounded p-4 space-y-4 bg-gray-50">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                  <Input
+                    value={art.articulosCopaci}
+                    onChange={(e) => handleArticuloChangeCopaci(index, "articulo", e.target.value)}
+                    placeholder="Nombre del artículo *"
+                    label={`Artículo ${index + 1}`}
+                    required
+                  />
+                  <Input
+                    type="number"
+                    min="1"
+                    value={art.cantidad}
+                    onChange={(e) => handleArticuloChangeCopaci(index, "cantidad", e.target.value)}
+                    placeholder="Cantidad *"
+                    label="Cantidad"
+                    required
+                  />
+                  <Button 
+                    onClick={() => removeArticuloCopaci(index)} 
+                    variant="danger"
+                    // className="h-[42px]"
+                  >
+                    Eliminar
+                  </Button>
+                </div>
+                
+                {art.cantidad > 0 && (
+                  <div className="space-y-3">
+                    <p className="font-medium">Evidencias fotográficas:</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      {[...Array(art.cantidad)].map((_, i) => (
+                        <div key={i} className="flex flex-col md:flex-row gap-3 items-start md:items-center">
+                          <div className="flex-1">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleFotoChangeCopaci(index, i, e.target.files[0])}
+                              disabled={isSubmitting}
+                              required
+                              label={`Evidencia ${i + 1}`}
+                            />
+                            {art.fotos?.[i]?.url && (
+                              <div className="mt-1 text-sm text-green-600 flex items-center">
+                                <span className="mr-2">✓ {art.fotos[i].nombre}</span>
+                                <a 
+                                  href={art.fotos[i].url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 hover:underline"
+                                >
+                                  (Ver)
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="w-full md:w-32">
+                            <label className="block mb-1 text-sm font-medium">Estado</label>
+                            <select
+                              value={art.fotos?.[i]?.estado} // Corregido el operador ||
+                              onChange={(e) => handleEstadoFotoChangeCopaci(index, i, e.target.value)}
+                              className="border rounded px-3 py-2 w-full"
+                              disabled={!art.fotos?.[i]?.url}
+                            >
+                              <option value="Bueno">Bueno</option>
+                              <option value="Regular">Regular</option>
+                              <option value="Malo">Malo</option>
+                            </select>
+                          </div>
+
+                          
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+
+        
+      </div>
           </>
         )}
       </div>;
