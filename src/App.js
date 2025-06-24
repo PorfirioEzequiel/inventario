@@ -510,56 +510,8 @@ const delegacionesCatalogo = [
       </select>
     </div>
 
-    {/* <div className="mt-4">
-      <label className="block mb-1 text-sm font-medium">Estado de la pintura</label>
-      <select
-        name="estado_pintura"
-        value={form.estado_pintura}
-        onChange={handleInput}
-        className="border rounded px-3 py-2 w-full"
-      >
-        <option value="Bueno">Bueno</option>
-        <option value="Regular">Regular</option>
-        <option value="Malo">Malo</option>
-      </select>
-    </div> */}
-
-    {/* <div className="mt-4">
-      <label className="block mb-1 text-sm font-medium">Evidencia fotográfica del auditorio</label>
-      <input
-        type="file"
-        accept="image/*"
-        className="border rounded px-3 py-2 w-full"
-        onChange={async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const filename = `auditorio/${form.delegacion}/${uuidv4()}-${file.name}`;
-          const { error } = await supabase.storage.from("evidencias").upload(filename, file);
-          if (!error) {
-            const { data } = supabase.storage.from("evidencias").getPublicUrl(filename);
-            setForm((prev) => ({
-              ...prev,
-              foto_auditorio_url: data.publicUrl,
-              foto_auditorio_nombre: file.name,
-            }));
-          }
-        }}
-      />
-      {form.foto_auditorio_url && (
-        <div className="mt-2 text-sm text-green-600">
-          ✓ {form.foto_auditorio_nombre} —
-          <a
-            href={form.foto_auditorio_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline ml-1"
-          >
-            Ver
-          </a>
-        </div>
-      )}
-    </div> */}
-
+    
+    
         {form.cuenta_auditorio === "Sí" && (
       <div className="mt-6">
         <label className="block font-medium mb-2">Fotos del auditorio (6 imágenes)</label>
