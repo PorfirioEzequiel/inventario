@@ -470,7 +470,7 @@ const delegacionesCatalogo = [
                   />
                   {form.fotos_copaci[i]?.url && (
                     <div className="text-green-600 text-sm mt-1">
-                      ✓ {form.fotos_copaci[i].nombre} — <a className="text-blue-600 underline" href={form.fotos_copaci[i].url} target="_blank">Ver</a>
+                      ✓ {form.fotos_copaci[i].nombre} — <a className="text-blue-600 underline" href={form.fotos_copaci[i].url} target="_blank" rel="noreferrer">Ver</a>
                     </div>
                   )}
                 </div>
