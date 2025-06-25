@@ -481,7 +481,7 @@ const delegacionesCatalogo = [
               <label className="block mb-1 text-sm font-medium"></label>
               <Textarea
                 name="condiciones_copaci"
-                placeholder="Necesidades de mantenimeito de las instalaciones del COPACI"
+                placeholder="Necesidades de mantenimiento de las instalaciones del COPACI"
                 value={form.condiciones_copaci}
                 onChange={handleInput}
                 rows={2}
