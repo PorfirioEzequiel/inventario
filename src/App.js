@@ -478,7 +478,7 @@ const delegacionesCatalogo = [
         {form.instalaciones_copaci === "Sí" && (
           <>
             <div className="mt-4">
-              <label className="block mb-1 text-sm font-medium">Condiciones en que se encuentra</label>
+              <label className="block mb-1 text-sm font-medium"></label>
               <Textarea
                 name="condiciones_copaci"
                 placeholder="Necesidades de mantenimeito de las instalaciones del COPACI"
@@ -624,7 +624,7 @@ const delegacionesCatalogo = [
       </div>
           </>
         )}
-      </div>;
+      </div>
 
 
       <div className="mb-6">
